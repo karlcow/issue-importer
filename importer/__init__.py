@@ -40,6 +40,11 @@ def get_issue_body(json_data):
                        json_data['body'])
 
 
+def format_issue(json_data, json_format='moz'):
+    '''Transform the issue data into something usable by importer'''
+    pass
+
+
 def get_post_body(json_data):
     '''Create the POST "body" object.'''
     body = {}
@@ -103,14 +108,13 @@ def get_as_json(issue_file):
     return r
 
 
-def validate_json(issue_file, skip_labels=False):
-    '''Validate the structure of `file_name` against our JSON schema.'''
-    json_data = get_as_json(issue_file)
+def validate_json(json_data, skip_labels=False):
+    '''Validate the structure of `json_data` against our JSON schema.'''
     if not skip_labels:
         schema['properties']['labels']['items'].update(enum=get_labels())
     try:
         jsonschema.validate(json_data, schema)
-        create_issue(json_data)
+        return True
     except jsonschema.exceptions.ValidationError as e:
         cprint('JSON Schema validation failed:', 'white', 'on_red')
         print('\n')
@@ -119,6 +123,7 @@ def validate_json(issue_file, skip_labels=False):
             print(e.message)
         else:
             print(e)
+        return False
 
 
 def get_labels():

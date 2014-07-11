@@ -8,8 +8,8 @@
 
 import argparse
 import sys
-from importer import validate_json, print_labels
 from importer import validate_json, print_labels, create_issue, get_as_json, format_issue
+from termcolor import cprint
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -30,3 +30,17 @@ if __name__ == '__main__':
         sys.exit(0)
     # Let's get the data
     json_data = get_as_json(args.issue_file)
+    # Mode without consequences
+    if args.dry_run:
+        cprint('Test Mode Run. Nothing is sent to github', 'yellow')
+        webcompat_issue = format_issue(json_data, args.origin)
+    # Mode with consequences
+    else:
+        # Processing an issue only if it's valid
+        if validate_json(json_data, args.force):
+            create_issue(json_data)
+            cprint('Creating the issue on Github', 'green')
+        else:
+            cprint('Invalid JSON data for the issue', 'red')
+            sys.exit(0)
+

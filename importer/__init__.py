@@ -40,8 +40,10 @@ def get_issue_body(json_data):
                        json_data['body'])
 
 
-def format_issue(json_data, json_format='moz'):
+def format_issue(json_data, json_format):
     '''Transform the issue data into something usable by importer'''
+    if json_format == 'moz':
+        cprint('Converting Mozilla bugs', 'yellow')
     pass
 
 

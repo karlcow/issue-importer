@@ -20,7 +20,6 @@ if __name__ == '__main__':
     parser.add_argument('-f', '--force', action='store_true',
                         help='Don\'t validate labels against the issues repo.')
     parser.add_argument('-o', '--origin', action='store_true',
-                        choices=['moz', 'ms', 'blink', 'apple'],
                         help='Adjust the import to the JSON issue format')
     parser.add_argument('-d', '--dry-run', action='store_true',
                         help='No modifications, just testing')

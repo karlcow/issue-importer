@@ -9,6 +9,7 @@
 import argparse
 import sys
 from importer import validate_json, print_labels
+from importer import validate_json, print_labels, create_issue, get_as_json, format_issue
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -23,7 +24,9 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--dry-run', action='store_true',
                         help='No modifications, just testing')
     args = parser.parse_args()
+    # Printing the list of existing labels on Github
     if args.labels:
         print_labels()
         sys.exit(0)
-    validate_json(args.issue_file, args.force)
+    # Let's get the data
+    json_data = get_as_json(args.issue_file)

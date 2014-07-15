@@ -13,7 +13,7 @@ import os
 import re
 import requests
 
-from config import REPO_URI, OAUTH_TOKEN
+from config import REPO_PATH, OAUTH_TOKEN
 from schema import schema
 from termcolor import cprint
 from textwrap import fill
@@ -24,6 +24,8 @@ labels when creating issues. Please email miket@mozilla.com if you feel like
 this label should be added to the web-bugs issues repo. To ignore this type
 of validation and proceed, try again using the --force option.
 '''
+
+REPO_URI = 'https://api.github.com/repos/{0}'.format(REPO_PATH)
 
 
 def get_issue_body(json_data):
@@ -47,12 +49,11 @@ def format_issue(json_data, json_format):
     pass
 
 
-def get_post_body(json_data):
+def format_post_body(json_data):
     '''Create the POST "body" object.'''
-    body = {}
-    body['body'] = get_issue_body(json_data)
-    body['title'] = json_data['title']
-    body['labels'] = json_data['labels']
+    body = {'body': get_issue_body(json_data),
+            'title': json_data['title'],
+            'labels': json_data['labels']}
     return body
 
 
@@ -70,8 +71,8 @@ def create_issue(json_data):
     '''Create a new GitHub issue by POSTing data to the issues API endpoint.
     If successful, the URL to the new issue is printed. Otherwise, the error
     code is printed.'''
-    body = get_post_body(json_data)
-    uri = 'https://api.github.com/repos/{0}/issues'.format(REPO_URI)
+    body = format_post_body(json_data)
+    uri = '{0}/issues'.format(REPO_URI)
     r = api_post(uri, body)
     if r.status_code != 201:
         cprint('Something went wrong. Response: {0}. See '
@@ -93,8 +94,7 @@ def add_comment(issue_number, comment):
     '''After the issue has been created, add comments (if any).'''
     if not comment:
         return False
-    uri = 'https://api.github.com/repos/{0}/issues/{1}/comments'.format(
-        REPO_URI, issue_number)
+    uri = '{0}/issues/{1}/comments'.format(REPO_URI, issue_number)
     post_body = {'body': comment}
     return api_post(uri, post_body)
 
@@ -130,11 +130,9 @@ def validate_json(json_data, skip_labels=False):
 
 def get_labels():
     '''Returns all labels in use for the given repo at REPO_URI.'''
-    uri = 'https://api.github.com/repos/{0}/labels'.format(REPO_URI)
-    labels = []
+    uri = '{0}/labels'.format(REPO_URI)
     r = requests.get(uri)
-    for label in r.json():
-        labels.append(label.get('name'))
+    labels = [label.get('name') for label in r.json()]
     return labels
 
 

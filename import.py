@@ -8,7 +8,7 @@
 
 import argparse
 import sys
-from importer import validate_json, print_labels, create_issue, get_as_json, format_issue
+from importer import validate_json, print_labels, create_issue, get_as_json, format_issue, get_issue_body
 from termcolor import cprint
 
 if __name__ == '__main__':
@@ -35,6 +35,7 @@ if __name__ == '__main__':
     if args.dry_run:
         cprint('Test Mode Run. Nothing is sent to github', 'yellow')
         webcompat_issue = format_issue(json_data, args.origin)
+        print get_issue_body(webcompat_issue)
     # Mode with consequences
     else:
         # Processing an issue only if it's valid

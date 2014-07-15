@@ -48,7 +48,7 @@ def format_issue(json_data, json_format):
     '''Transform the issue data into something usable by importer'''
     if json_format == 'moz':
         cprint('Converting Mozilla bugs', 'yellow')
-        webcompat_json = adapters.mozilla_adapter.convert_json_data(json_data)
+        webcompat_json = adapters.mozilla_adapter.convert_issue_data(json_data)
     else:
         webcompat_json = None
         cprint('Time for you to code an adapter', 'white', 'on_red')

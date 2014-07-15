@@ -17,6 +17,8 @@ from config import REPO_PATH, OAUTH_TOKEN
 from schema import schema
 from termcolor import cprint
 from textwrap import fill
+import adapters
+
 
 LABEL_VALIDATION_ERROR = '''
 You attempted to create an issue with an unknown label. GitHub ignores unknown
@@ -46,8 +48,13 @@ def format_issue(json_data, json_format):
     '''Transform the issue data into something usable by importer'''
     if json_format == 'moz':
         cprint('Converting Mozilla bugs', 'yellow')
-    pass
-
+        webcompat_json = adapters.mozilla_adapter.convert_json_data(json_data)
+    else:
+        webcompat_json = None
+        cprint('Time for you to code an adapter', 'white', 'on_red')
+        print 'We need an adapter for the format %s' % (json_format)
+        print 'See http://github.com/webcompat/issue-importer'
+    return webcompat_json
 
 def format_post_body(json_data):
     '''Create the POST "body" object.'''

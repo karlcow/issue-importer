@@ -28,7 +28,7 @@ of validation and proceed, try again using the --force option.
 '''
 
 REPO_URI = 'https://api.github.com/repos/{0}'.format(REPO_PATH)
-
+USER_AGENT = 'Webcompat-Issue-Importer'
 
 def get_issue_body(json_data):
     '''Return the issue body in the proper format.'''
@@ -69,10 +69,21 @@ def api_post(uri, body):
     what gets created (currently either an issue or a comment).'''
     headers = {
         'Authorization': 'token {0}'.format(OAUTH_TOKEN),
-        'User-Agent': 'Webcompat-Issue-Importer'
+        'User-Agent': USER_AGENT
     }
     return requests.post(uri, data=json.dumps(body), headers=headers)
 
+def fake_message(webcompat_issue):
+    '''Generate a fake message for the dry run'''
+    message = u'''
+    POST /repos/{0} HTTP/1.1
+    Host: api.github.com
+    Authorization: ***OBFUSCATED****
+    User-Agent: {1}
+
+    {2}
+    '''
+    return message.format(REPO_PATH, USER_AGENT, format_post_body(webcompat_issue))
 
 def create_issue(json_data):
     '''Create a new GitHub issue by POSTing data to the issues API endpoint.
@@ -120,7 +131,9 @@ def get_as_json(issue_file):
 def validate_json(json_data, skip_labels=False):
     '''Validate the structure of `json_data` against our JSON schema.'''
     if not skip_labels:
-        schema['properties']['labels']['items'].update(enum=get_labels())
+        labels = get_labels()
+        labels.extend(['serversniff', 'clientsniff', 'imported'])
+        schema['properties']['labels']['items'].update(enum=labels)
     try:
         jsonschema.validate(json_data, schema)
         return True

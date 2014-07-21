@@ -5,8 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import re
-
-VALID_LABELS = ['serversniff', 'clientsniff', 'js', 'webkitcss']
+VALID_LABELS = ['serversniff', 'clientsniff']
 
 def convert_issue_data(json_data):
     '''Take the json data from the bug repo and convert it

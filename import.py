@@ -8,7 +8,7 @@
 
 import argparse
 import sys
-from importer import validate_json, print_labels, create_issue, get_as_json, format_issue, get_issue_body
+from importer import validate_json, print_labels, create_issue, get_as_json, format_post_body, format_issue, fake_message
 from termcolor import cprint
 
 if __name__ == '__main__':
@@ -22,27 +22,40 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--origin',
                         choices=['moz', 'ms', 'blink', 'apple'],
                         help='Adjust the import to the JSON issue format')
-    parser.add_argument('-d', '--dry-run', action='store_true',
-                        help='No modifications, just testing')
+    publishgroup = parser.add_mutually_exclusive_group()
+    publishgroup.add_argument('-t', '--test', action='store_true',
+                        help='NO publishing on Github, just testing')
+    publishgroup.add_argument('-g', '--github', action='store_true',
+                        help='Publishing on Github. Irreversible.')
     args = parser.parse_args()
     # Printing the list of existing labels on Github
     if args.labels:
         print_labels()
         sys.exit(0)
-    # Let's get the data
-    json_data = get_as_json(args.issue_file)
-    # Mode without consequences
-    if args.dry_run:
-        cprint('Test Mode Run. Nothing is sent to github', 'yellow')
+    elif args.origin:
+        # Let's get the data
+        json_data = get_as_json(args.issue_file)
+        # create the data with the right format
         webcompat_issue = format_issue(json_data, args.origin)
-        print get_issue_body(webcompat_issue)
-    # Mode with consequences
     else:
-        # Processing an issue only if it's valid
-        if validate_json(json_data, args.force):
-            create_issue(json_data)
+        cprint('Missing --labels or --origin', 'white', 'on_red')
+        parser.print_help()
+        sys.exit(0)
+    # Validation
+    if validate_json(webcompat_issue, args.force):
+        if args.github:
+            # Mode with consequences
+            create_issue(webcompat_issue)
             cprint('Creating the issue on Github', 'green')
+        elif args.test:
+            # Mode without consequences
+            cprint('Test Mode Run. Nothing is sent to github', 'yellow')
+            print fake_message(webcompat_issue)
         else:
-            cprint('Invalid JSON data for the issue', 'red')
+            cprint('Missing --test or --github', 'white', 'on_red')
+            parser.print_help()
             sys.exit(0)
+    else:
+        cprint('Invalid JSON data for the issue', 'red')
+        sys.exit(0)
 
